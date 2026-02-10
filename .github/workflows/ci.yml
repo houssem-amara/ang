@@ -37,15 +37,6 @@ jobs:
       artifact-path: 'dist/ang/browser'
     secrets: inherit
 
-  # Import publish workflow (only on main)
-  publish:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [versioning, check, build]
-    uses: houssem-amara/github-ci-common/.github/workflows/publish.yml@main
-    with:
-      registry-url: 'https://registry.npmjs.org'
-    secrets: inherit
-
   # Import release workflow (only on main or release branches)
   release:
     if: |
