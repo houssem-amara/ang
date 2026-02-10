@@ -34,7 +34,6 @@ jobs:
       node-version: '20'
       build-command: 'npm run build'
       artifact-name: 'angular-app'
-      artifact-path: 'dist/ang/browser'
     secrets: inherit
 
   # Import release workflow (only on main or release branches)
