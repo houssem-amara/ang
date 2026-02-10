@@ -1,0 +1,56 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # Import versioning workflow
+  versioning:
+    uses: houssem-amara/github-ci-common/.github/workflows/versioning.yml@main
+    secrets: inherit
+
+  # Import check workflow
+  check:
+    needs: versioning
+    uses: houssem-amara/github-ci-common/.github/workflows/check.yml@main
+    secrets: inherit
+
+  # Import build workflow
+  build:
+    needs: [versioning, check]
+    uses: houssem-amara/github-ci-common/.github/workflows/build.yml@main
+    with:
+      node-version: '20'
+      build-command: 'npm run build'
+      artifact-name: 'angular-app'
+      artifact-path: 'dist/ang/browser'
+    secrets: inherit
+
+  # Import publish workflow (only on main)
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [versioning, check, build]
+    uses: houssem-amara/github-ci-common/.github/workflows/publish.yml@main
+    with:
+      registry-url: 'https://registry.npmjs.org'
+    secrets: inherit
+
+  # Import release workflow (only on main or release branches)
+  release:
+    if: |
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) && 
+      github.event_name == 'push'
+    needs: [versioning, check, build]
+    uses: houssem-amara/github-ci-common/.github/workflows/release.yml@main
+    secrets: inherit
