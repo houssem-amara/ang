@@ -1,0 +1,33 @@
+name: Lighthouse CI
+
+on:
+  schedule:
+    # Run every Thursday at 1:00 AM (matching Bamboo schedule)
+    - cron: '0 1 * * 4'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'lighthouserc.json'
+
+permissions:
+  contents: read
+
+jobs:
+  # Import versioning workflow
+  versioning:
+    uses: houssem-amara/github-ci-common/.github/workflows/versioning.yml@main
+    secrets: inherit
+
+  # Import check workflow with Lighthouse enabled
+  lighthouse:
+    needs: versioning
+    uses: houssem-amara/github-ci-common/.github/workflows/check.yml@main
+    with:
+      node-version: '20'
+      run-security-scan: false
+      run-lighthouse: true
+    secrets: inherit
